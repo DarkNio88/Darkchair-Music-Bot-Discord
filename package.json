@@ -1,0 +1,21 @@
+{
+  "name": "darkchair-music-bot-discord",
+  "version": "1.0.0",
+  "description": "Discord music bot that plays YouTube audio",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"  
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.0",
+    "@snazzah/davey": "^0.1.9",
+    "discord.js": "^14.25.1",
+    "dotenv": "latest",
+    "libsodium-wrappers-sumo": "^0.7.15",
+    "node-opus": "^0.3.3",
+    "opusscript": "^0.0.8",
+    "yt-search": "latest",
+    "darkchair_api_youtube": "git+https://github.com/DarkNio88/DarkChair_API_YouTube.git"
+  }
+}
