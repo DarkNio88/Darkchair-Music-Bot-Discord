@@ -30,24 +30,6 @@ chmod +x start-discord-bot-screen.sh
 ./start-discord-bot-screen.sh darkchair-bot
 ```
 
-Alternatively start interactively (uses `xvfb-run` when available):
-
-```bash
-cd /root/music/darkchair_api_yt
-npm run auth
-```
-
-Initialize Git
-
-If you haven't already initialized the git repository, run:
-
-```bash
-cd /root/music
-git init
-git add .
-git commit -m "Initial commit — Discord bot + darkchair_api_yt"
-```
-
 Security notes
 
 - Keep `.env` and `cookies.txt` private (they are included in `.gitignore`).

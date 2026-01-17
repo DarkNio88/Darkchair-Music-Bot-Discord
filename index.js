@@ -10,7 +10,7 @@ const {
   VoiceConnectionStatus,
 } = require('@discordjs/voice');
 const yts = require('yt-search');
-const yt = require('./darkchair_api_yt');
+const yt = require('darkchair_api_youtube');
 // `ytdl-core-discord` removed — relying on `yt-dlp` via `darkchair_api_yt`
 const fs = require('fs');
 const path = require('path');
@@ -53,6 +53,9 @@ async function replyAndDelete(triggerMessage, content, ms = 10000) {
 const PREFIX = '!';
 // Prefer token from environment variables; fall back to any hardcoded TOKEN in file
 const TOKEN = process.env.BOT_TOKEN || process.env.TOKEN || process.env.DISCORD_TOKEN || null;
+
+// Array of author tags to ignore in debug logging
+const IGNORED_AUTHORS = ['GS Defender#7592', 'ProBot ✨#5803'];
 
 if (!TOKEN) {
   console.error('Bot token missing. Set BOT_TOKEN (or TOKEN / DISCORD_TOKEN) in .env or environment.');
@@ -192,7 +195,13 @@ client.once('clientReady', handleClientReady);
 
 client.on('messageCreate', async (message) => {
   // DEBUG: log message arrival for troubleshooting
-  try { console.log('messageCreate:', { author: message.author && message.author.tag, guild: message.guild && message.guild.id, channel: message.channel && message.channel.id, contentPreview: (message.content||'').slice(0,120) }); } catch(e){}
+  try {
+    const authorTag = message.author && message.author.tag;
+    // Filter out debug logs for these noisy authors so they don't appear in the console
+    if (!IGNORED_AUTHORS.includes(authorTag)) {
+      console.log('messageCreate:', { author: authorTag, guild: message.guild && message.guild.id, channel: message.channel && message.channel.id, contentPreview: (message.content||'').slice(0,120) });
+    }
+  } catch(e){}
   if (message.author.bot) return;
   if (!message.guild) return;
   const tokens = message.content.trim().split(/ +/);
