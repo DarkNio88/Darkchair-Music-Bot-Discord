@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-npm remove darkchair_api_youtube
-npm install https://github.com/DarkNio88/DarkChair_API_YouTube.git
+#npm remove darkchair_api_youtube
+#npm install https://github.com/DarkNio88/DarkChair_API_YouTube.git
 
 # Starter script for the Discord bot
 # Uses xvfb-run -s "-screen 0 1280x720x24" node index.js when available

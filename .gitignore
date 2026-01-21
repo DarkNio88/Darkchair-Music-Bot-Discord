@@ -26,3 +26,5 @@ thumbs.db
 discordbot_voce.js
 darkchair_api_yt/
 .local-firefox-profile/
+last_tracks.json
+package-lock.json
