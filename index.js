@@ -27,6 +27,8 @@ try {
 
 const LAST_TRACKS_FILE = path.join(process.cwd(), 'last_tracks.json');
 let lastTracks = {};
+const PLAYLISTS_DIR = path.join(process.cwd(), 'playlists');
+try { if (!fs.existsSync(PLAYLISTS_DIR)) fs.mkdirSync(PLAYLISTS_DIR); } catch (e) { console.error('Could not ensure playlists dir:', e); }
 function loadLastTracks() {
   try {
     if (fs.existsSync(LAST_TRACKS_FILE)) {
@@ -448,7 +450,7 @@ client.on('messageCreate', async (message) => {
     const authorTag = message.author && message.author.tag;
     // Filter out debug logs for these noisy authors so they don't appear in the console
     if (!IGNORED_AUTHORS.includes(authorTag)) {
-      console.log('messageCreate:', { author: authorTag, guild: message.guild && message.guild.id, channel: message.channel && message.channel.id, contentPreview: (message.content||'').slice(0,120) });
+      console.log('messageCreate:', { author: authorTag, ...message});
     }
   } catch(e){}
   if (message.author.bot) return;
@@ -460,10 +462,7 @@ client.on('messageCreate', async (message) => {
   if (cmdToken.startsWith('/') || cmdToken.startsWith('!')) cmdToken = cmdToken.slice(1);
   const cmd = cmdToken.toLowerCase();
   const args = tokens.slice(1);
-  const valid = new Set(['play','p','skip','stop','queue','q','np','replay','r']);
-  // support posting the controls panel
-  valid.add('controls');
-  valid.add('c');
+    const valid = new Set(['play','p','skip','stop','queue','q','np','replay','r','controls','c','playplaylist','pp','listplaylists','lpl']);
   if (!valid.has(cmd)) return;
   console.log(`Command received from ${message.author.tag}: ${message.content}`);
 
@@ -507,10 +506,22 @@ client.on('messageCreate', async (message) => {
         const items = await fetchPlaylistItems(url, 100);
         if (!items || items.length === 0) { await replyAndDelete(message, 'Nessun elemento trovato nella playlist.'); return; }
         items.forEach((it) => q.songs.push({ title: it.title, url: it.url, requestedBy: message.author.username }));
+        // persist the fetched playlist to disk so it can be replayed later
+        try {
+          const fname = `playlist_${message.guild.id}_${Date.now()}.json`;
+          const fpath = path.join(PLAYLISTS_DIR, fname);
+          fs.writeFileSync(fpath, JSON.stringify(items, null, 2), 'utf8');
+          console.log('Saved playlist to', fpath);
+          // inform the user about saved playlist file
+          await replyAndDelete(message, `Aggiunta ${items.length} brani dalla playlist: **${items[0].title}** (salvata come ${fname})`);
+        } catch (e) {
+          console.error('Failed to save playlist file:', e);
+          await replyAndDelete(message, `Aggiunta ${items.length} brani dalla playlist: **${items[0].title}** (impossibile salvare su file)`);
+        }
         // Remember last requested as first item
         q.lastRequested = { title: items[0].title, url: items[0].url, requestedBy: message.author.username };
         try { lastTracks[message.guild.id] = q.lastRequested; saveLastTracks(); } catch (e) { console.error('Failed to persist lastRequested for guild', message.guild.id, e && e.message ? e.message : e); }
-        await replyAndDelete(message, `Aggiunta ${items.length} brani dalla playlist: **${items[0].title}**`);
+        // reply already sent above after attempting to save
         // send controls immediately in the channel where play was requested
         try {
           if (!q.controlsMessage && q.controlChannelId) {
@@ -615,6 +626,63 @@ client.on('messageCreate', async (message) => {
       console.error('Errore replay:', e);
       await replyAndDelete(message, 'Impossibile riprodurre l\'ultimo brano.');
     }
+  }
+
+  if (cmd === 'listplaylists' || cmd === 'lpl') {
+    try {
+      const files = fs.readdirSync(PLAYLISTS_DIR).filter(f => f.includes(message.guild.id));
+      if (!files || files.length === 0) {
+        await replyAndDelete(message, 'Nessuna playlist salvata per questo server.');
+        return;
+      }
+      const lines = files.map(f => `- ${f}`);
+      await replyAndDelete(message, `Playlist salvate:\n${lines.join('\n')}`, 15000);
+    } catch (e) {
+      console.error('listplaylists error', e);
+      await replyAndDelete(message, 'Errore nel leggere le playlist salvate.');
+    }
+    return;
+  }
+
+  if (cmd === 'playplaylist' || cmd === 'pp') {
+    const fname = args[0];
+    if (!fname) { await replyAndDelete(message, `Usage: ${PREFIX}playplaylist <filename>`); return; }
+    const fpath = path.join(PLAYLISTS_DIR, fname);
+    if (!fs.existsSync(fpath)) { await replyAndDelete(message, `File non trovato: ${fname}`); return; }
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel) { await replyAndDelete(message, 'Devi essere in un canale vocale.'); return; }
+    try {
+      const q = await ensureConnection(voiceChannel, message.guild.id);
+      // remember control channel
+      try { q.controlChannelId = message.channel && message.channel.id; } catch (e) {}
+      const raw = fs.readFileSync(fpath, 'utf8');
+      const items = JSON.parse(raw);
+      if (!Array.isArray(items) || items.length === 0) { await replyAndDelete(message, 'Playlist vuota o file non valido.'); return; }
+      items.forEach((it) => q.songs.push({ title: it.title, url: it.url, requestedBy: message.author.username }));
+      q.lastRequested = { title: items[0].title, url: items[0].url, requestedBy: message.author.username };
+      try { lastTracks[message.guild.id] = q.lastRequested; saveLastTracks(); } catch (e) {}
+      await replyAndDelete(message, `Aggiunta ${items.length} brani dalla playlist file: **${fname}**`);
+      // send controls immediately
+      try {
+        if (!q.controlsMessage && q.controlChannelId) {
+          const ch = await client.channels.fetch(q.controlChannelId).catch(() => null);
+          if (ch && typeof ch.send === 'function') {
+            const payload = await buildControlsMessageForQueue(q, message.guild.id);
+            const sent = await ch.send(payload).catch(() => null);
+            if (sent) {
+              q.controlsMessage = sent;
+              try { if (q.controlsInterval) clearInterval(q.controlsInterval); } catch (e) {}
+              q.controlsInterval = setInterval(() => updateControlsMessage(message.guild.id), 5000);
+            }
+          }
+        }
+      } catch (e) { console.error('send controls on playplaylist error', e); }
+      if (!q.playing) playNext(message.guild.id);
+    } catch (e) {
+      console.error('playplaylist error', e);
+      await replyAndDelete(message, 'Impossibile riprodurre la playlist dal file.');
+    }
+    return;
   }
 
   if (cmd === 'skip') {
