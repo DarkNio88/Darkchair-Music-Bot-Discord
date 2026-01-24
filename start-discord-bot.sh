@@ -22,8 +22,8 @@ fi
 
 if command -v xvfb-run >/dev/null 2>&1; then
   echo "Starting bot under xvfb-run (virtual X frame buffer)"
-  exec xvfb-run -s "-screen 0 1280x720x24" node index.js
+  exec xvfb-run -s "-screen 0 1280x720x24" node watch-restart.js ./index.js
 else
   echo "xvfb-run not found — starting node directly"
-  exec node index.js
+  exec node watch-restart.js ./index.js
 fi

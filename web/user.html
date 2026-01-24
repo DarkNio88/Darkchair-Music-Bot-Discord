@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Music Bot - Pagina utente</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Pagina personale</h1>
+    <div id="sessionInfo">Caricamento sessione...</div>
+    <div id="status">
+      <h2 id="guildName">-</h2>
+      <div id="now">Nessuna traccia</div>
+      <div id="queueList"></div>
+    </div>
+
+    <div id="quickActions">
+      <button id="btnSkip">⏭️ Skip</button>
+      <button id="btnPause">⏯️ Pause</button>
+      <button id="btnResume">▶️ Resume</button>
+      <button id="btnStop">⏹️ Stop</button>
+      <label style="margin-left:12px">Volume: <input id="volume" type="number" min="0" max="2" step="0.05" value="1.0" style="width:80px"></label>
+      <button id="btnSetVol">Set</button>
+      <button id="btnShuffle">🔀 Shuffle</button>
+      <button id="btnRepeat">🔁 Repeat</button>
+    </div>
+  </div>
+  <script src="/user.js"></script>
+</body>
+</html>

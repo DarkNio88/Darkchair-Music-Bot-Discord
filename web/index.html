@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Music Bot - Web Control</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Music Bot - Controllo</h1>
+    <div id="controls">
+      <label>Server: <select id="guilds"></select></label>
+      <button id="refreshGuilds">Aggiorna</button>
+    </div>
+
+    <div id="status">
+      <h2 id="guildName">Seleziona un server</h2>
+      <div id="now">Nessuna informazione</div>
+      <div id="queueList"></div>
+    </div>
+
+    <div id="playlists" class="panel">
+      <h3>Playlist salvate</h3>
+      <div id="playlistList">Caricamento...</div>
+      <div id="playlistEditor" style="display:none;margin-top:12px;background:#081225;padding:10px;border-radius:8px">
+        <h4 id="editorTitle">Editor</h4>
+        <div id="editorTracks"></div>
+        <div style="margin-top:8px">
+          <button id="addTrackBtn">Aggiungi traccia</button>
+          <button id="savePlaylistBtn">Salva</button>
+          <button id="cancelEditBtn">Annulla</button>
+        </div>
+      </div>
+      <div id="createPlaylist" style="margin-top:12px">
+        <input id="newPlaylistName" placeholder="Nome playlist (es. mylist)" />
+        <button id="createPlaylistBtn">Crea playlist</button>
+      </div>
+    </div>
+
+    <div id="trash" class="panel">
+      <h3>Cestino playlist <span id="trashBadge" class="badge">0</span></h3>
+      <div id="trashList">Caricamento...</div>
+    </div>
+
+    <div id="actions">
+      <button id="btnSkip">⏭️ Skip</button>
+      <button id="btnPause">⏯️ Pause</button>
+      <button id="btnResume">▶️ Resume</button>
+      <button id="btnStop">⏹️ Stop</button>
+      <button id="btnClearQueue">🧹 Pulisci coda</button>
+      <label>Volume: <input id="volume" type="number" min="0" max="2" step="0.05" value="0.8"></label>
+      <button id="btnSetVol">Set</button>
+      <button id="btnShuffle">🔀 Shuffle</button>
+      <button id="btnRepeat">🔁 Repeat</button>
+    </div>
+
+    <div id="sendMsg">
+      <h3>Invia messaggio</h3>
+      <label>Canale: <select id="channelSelect"><option value="">-- seleziona --</option></select></label>
+      <textarea id="msgContent" placeholder="Messaggio..."></textarea>
+      <button id="btnSend">Invia</button>
+    </div>
+  </div>
+  <!-- Modal per inserimento password (inizialmente nascosto) -->
+  <div id="webSecretModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999">
+    <div style="padding:20px;border-radius:6px;width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+      <div style="font-weight:600;margin-bottom:8px">Inserisci password admin</div>
+      <input id="webSecretInput" type="password" style="width:100%;padding:8px;margin-bottom:8px" placeholder="Password" />
+      <div style="margin-bottom:8px"><label><input id="webSecretRemember" type="checkbox" /> Ricorda password</label></div>
+      <div id="webSecretErr" style="color:red;height:18px;margin-bottom:8px"></div>
+      <div style="display:flex;justify-content:flex-end">
+        <button id="webSecretCancel" class="secondary" style="margin-right:8px">Annulla</button>
+        <button id="webSecretOk" class="primary" style="font-weight:600">OK</button>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

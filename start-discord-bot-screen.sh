@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-npm remove darkchair_api_youtube
-npm install https://github.com/DarkNio88/DarkChair_API_YouTube.git
+#npm remove darkchair_api_youtube
+#npm install https://github.com/DarkNio88/DarkChair_API_YouTube.git
 
 # Start the Discord bot inside a detached GNU screen session
 # Usage: ./start-discord-bot-screen.sh [session-name]

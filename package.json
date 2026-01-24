@@ -4,7 +4,8 @@
   "description": "Discord music bot that plays YouTube audio",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "watch": "node watch-restart.js"
   },
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
@@ -17,6 +18,8 @@
     "node-opus": "^0.3.3",
     "opusscript": "^0.0.8",
     "sharp": "^0.34.5",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
     "yt-search": "latest"
   }
 }
